@@ -1,168 +1,138 @@
-// =========================
-// MENÚ MÓVIL
-// =========================
+/* ====================================================
+   AUREN CAPITAL DESK — script.js
+==================================================== */
+
+// ── MENÚ MÓVIL ──────────────────────────────────────
 (() => {
-  const btn = document.getElementById("navToggle");
-  const nav = document.getElementById("navMenu");
+  const btn = document.getElementById('navToggle');
+  const nav = document.getElementById('navMenu');
   if (!btn || !nav) return;
 
-  btn.addEventListener("click", () => {
-    nav.classList.toggle("is-open");
+  btn.addEventListener('click', () => {
+    nav.classList.toggle('is-open');
+    btn.classList.toggle('is-open');
   });
 
-  nav.querySelectorAll("a").forEach(link => {
-    link.addEventListener("click", () => nav.classList.remove("is-open"));
-  });
+  nav.querySelectorAll('a').forEach(a =>
+    a.addEventListener('click', () => {
+      nav.classList.remove('is-open');
+      btn.classList.remove('is-open');
+    })
+  );
 })();
 
-// =========================
-// TABS DE SERVICIOS
-// =========================
+// ── HEADER SCROLL ───────────────────────────────────
 (() => {
-  const root = document.querySelector("[data-tabs]");
+  const header = document.getElementById('header');
+  if (!header) return;
+  const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 30);
+  window.addEventListener('scroll', onScroll, { passive: true });
+})();
+
+// ── SCROLL ANIMATIONS (Intersection Observer) ───────
+(() => {
+  const els = document.querySelectorAll('[data-anim]');
+  if (!els.length) return;
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  els.forEach(el => io.observe(el));
+})();
+
+// ── TABS SERVICIOS ───────────────────────────────────
+(() => {
+  const root = document.querySelector('[data-tabs]');
   if (!root) return;
 
-  const buttons = root.querySelectorAll(".tab-btn");
-  const panels = root.querySelectorAll(".tab-panel");
+  const btns   = root.querySelectorAll('.tab-btn');
+  const panels = root.querySelectorAll('.tab-pane');
 
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
       const target = btn.dataset.tab;
 
-      buttons.forEach(b => {
-        b.classList.remove("is-active");
-        b.setAttribute("aria-selected", "false");
+      btns.forEach(b => {
+        b.classList.remove('is-active');
+        b.setAttribute('aria-selected', 'false');
       });
-      btn.classList.add("is-active");
-      btn.setAttribute("aria-selected", "true");
+      btn.classList.add('is-active');
+      btn.setAttribute('aria-selected', 'true');
 
-      panels.forEach(panel => {
-        const active = panel.id === target;
-        panel.classList.toggle("is-active", active);
-        panel.hidden = !active;
-      });
-    });
-  });
-})();
-
-// =========================
-// FAQ POR CATEGORÍAS (TABS)
-// =========================
-(() => {
-  const root = document.querySelector("[data-faq-tabs]");
-  if (!root) return;
-
-  const cats = root.querySelectorAll(".faq-cat");
-  const panes = root.querySelectorAll(".faq-pane");
-
-  cats.forEach(cat => {
-    cat.addEventListener("click", () => {
-      const target = cat.dataset.faqCat;
-
-      cats.forEach(c => c.classList.remove("is-active"));
-      cat.classList.add("is-active");
-
-      panes.forEach(pane => {
-        const active = pane.id === target;
-        pane.classList.toggle("is-active", active);
-        pane.hidden = !active;
+      panels.forEach(p => {
+        const active = p.id === target;
+        p.classList.toggle('is-active', active);
+        p.hidden = !active;
       });
     });
   });
 })();
 
-// =========================
-// TESTIMONIOS FADE (NO SLIDER HORIZONTAL)
-// =========================
+// ── TESTIMONIOS FADE ─────────────────────────────────
 (() => {
-  const root = document.getElementById("fadeTestimonials");
+  const root    = document.getElementById('fadeTestimonials');
   if (!root) return;
 
-  const cards = Array.from(root.querySelectorAll(".fade-card"));
-  const dotsWrap = document.getElementById("fadeDots");
-  const prevBtn = document.getElementById("prevFade");
-  const nextBtn = document.getElementById("nextFade");
+  const cards    = Array.from(root.querySelectorAll('.testi-card'));
+  const dotsWrap = document.getElementById('fadeDots');
+  const prevBtn  = document.getElementById('prevFade');
+  const nextBtn  = document.getElementById('nextFade');
 
   let index = 0;
   let timer;
 
   function renderDots() {
     if (!dotsWrap) return;
-    dotsWrap.innerHTML = "";
+    dotsWrap.innerHTML = '';
     cards.forEach((_, i) => {
-      const dot = document.createElement("button");
-      if (i === index) dot.classList.add("is-active");
-      dot.addEventListener("click", () => {
-        index = i;
-        update();
-        restart();
-      });
-      dotsWrap.appendChild(dot);
+      const d = document.createElement('button');
+      d.setAttribute('aria-label', `Testimonio ${i + 1}`);
+      if (i === index) d.classList.add('is-active');
+      d.addEventListener('click', () => { index = i; update(); restart(); });
+      dotsWrap.appendChild(d);
     });
   }
 
   function update() {
-    cards.forEach((card, i) => {
-      card.classList.toggle("is-active", i === index);
-    });
-    if (dotsWrap) {
-      [...dotsWrap.children].forEach((dot, i) => {
-        dot.classList.toggle("is-active", i === index);
-      });
-    }
+    cards.forEach((c, i) => c.classList.toggle('is-active', i === index));
+    if (dotsWrap)
+      [...dotsWrap.children].forEach((d, i) => d.classList.toggle('is-active', i === index));
   }
 
-  function next() {
-    index = (index + 1) % cards.length;
-    update();
-  }
+  function next() { index = (index + 1) % cards.length; update(); }
+  function prev() { index = (index - 1 + cards.length) % cards.length; update(); }
 
-  function prev() {
-    index = (index - 1 + cards.length) % cards.length;
-    update();
-  }
+  function start()   { stop(); timer = setInterval(next, 5000); }
+  function stop()    { clearInterval(timer); }
+  function restart() { start(); }
 
-  function start() {
-    stop();
-    timer = setInterval(next, 5000);
-  }
+  prevBtn?.addEventListener('click', () => { prev(); restart(); });
+  nextBtn?.addEventListener('click', () => { next(); restart(); });
 
-  function stop() {
-    if (timer) clearInterval(timer);
-  }
-
-  function restart() {
-    start();
-  }
-
-  prevBtn?.addEventListener("click", () => { prev(); restart(); });
-  nextBtn?.addEventListener("click", () => { next(); restart(); });
-
-  root.addEventListener("mouseenter", stop);
-  root.addEventListener("mouseleave", start);
+  root.addEventListener('mouseenter', stop);
+  root.addEventListener('mouseleave', start);
 
   renderDots();
   update();
   start();
 })();
 
-// =========================
-// TICKER LOGOS CONTINUO
-// Duplica items para loop visual más fluido
-// =========================
+// ── TICKER — duplicado para loop continuo ────────────
 (() => {
-  const track = document.getElementById("logosTicker");
-  if (!track) return;
+  const track = document.getElementById('logosTicker');
+  if (!track || track.dataset.cloned === 'true') return;
 
-  // Evita duplicar más de una vez
-  if (track.dataset.cloned === "true") return;
-
-  const items = Array.from(track.children);
-  items.forEach(item => {
+  Array.from(track.children).forEach(item => {
     const clone = item.cloneNode(true);
-    clone.setAttribute("aria-hidden", "true");
+    clone.setAttribute('aria-hidden', 'true');
     track.appendChild(clone);
   });
 
-  track.dataset.cloned = "true";
+  track.dataset.cloned = 'true';
 })();
